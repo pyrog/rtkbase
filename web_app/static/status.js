@@ -128,11 +128,11 @@ $(document).ready(function () {
 
     // ####################### HANDLE SATELLITE LEVEL BROADCAST #######################
 
-    socket.on("satellite broadcast rover", function(msg) {
+    socket.on("observations broadcast", function(msg) {
             //Tell the server we are still here
             socket.emit("on graph");
             
-            console.groupCollapsed('Rover satellite msg received:');
+            console.groupCollapsed('Observations msg received:');
                 for (var k in msg)
                     console.log(k + ':' + msg[k]);
             console.groupEnd();
@@ -140,10 +140,10 @@ $(document).ready(function () {
             chart.roverUpdate(msg);
     });
 
-    socket.on("satellite broadcast base", function(msg) {
+    socket.on("satellites broadcast", function(msg) {
         // check if the browser tab and app tab are active
         
-        console.groupCollapsed('Base satellite msg received:');
+        console.groupCollapsed('Satellite msg received:');
             for (var k in msg)
                 console.log(k + ':' + msg[k]);
         console.groupEnd();

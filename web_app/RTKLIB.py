@@ -672,13 +672,10 @@ class RTKLIB:
 
             # update satellite levels
             self.rtkc.getObs()
+            self.socketio.emit("observations broadcast", self.rtkc.obs, namespace = "/test")
 
-#            if count % 10 == 0:
-            #print("Sending sat rover levels:\n" + str(self.rtkc.obs_rover))
-            #print("Sending sat base levels:\n" + str(self.rtkc.obs_base))
-
-            self.socketio.emit("satellite broadcast rover", self.rtkc.obs_rover, namespace = "/test")
-            #self.socketio.emit("satellite broadcast base", self.rtkc.obs_base, namespace = "/test")
+            self.rtkc.getSat()
+            self.socketio.emit("satellites broadcast", self.rtkc.sat, namespace = "/test")
             count += 1
             self.sleep_count +=1
             time.sleep(1)

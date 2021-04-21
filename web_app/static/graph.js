@@ -275,7 +275,7 @@ function Chart() {
                 // get the sat level as an integer
                 current_level = parseInt(msg[label]);
 
-                new_sat_levels.push(current_level);
+                new_sat_levels.push(current_level/10); // TODO test: this is Azimuth, so divide it by ten to display it correctly
                 new_sat_fillcolors.push("#d9d9d9");
 
             } else {

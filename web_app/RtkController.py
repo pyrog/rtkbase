@@ -40,8 +40,8 @@ class RtkController:
         self.child = 0
 
         self.status = {}
-        self.obs_rover = {}
-        self.obs_base = {}
+        self.obs = {}
+        self.sat = {}
         self.info = {}
         self.semaphore = Semaphore()
 
@@ -238,8 +238,7 @@ class RtkController:
 
         self.semaphore.acquire()
 
-        self.obs_rover = {}
-        self.obs_base = {}
+        self.obs = {}
 
         self.child.send("obs\r\n")
 
@@ -268,8 +267,7 @@ class RtkController:
                 if len(obs) > (header_index + 1):
                     # we have some info about the actual satellites:
 
-                    self.obs_rover = {}
-                    self.obs_base = {}
+                    self.obs = {}
 
                     for line in obs[header_index+1:]:
                         spl = line.split()
@@ -278,20 +276,46 @@ class RtkController:
                             name = spl[sat_name_index]
                             level = spl[sat_level_index]
 
-                            # R parameter corresponds to the input source number
-                            if spl[sat_input_source_index] == "1":
-                                # we consider 1 to be rover,
-                                self.obs_rover[name] = level
-                            elif spl[sat_input_source_index] == "2":
-                                # 2 to be base
-                                self.obs_base[name] = level
+                            # we consider 1 to be rover,
+                            self.obs[name] = level
 
                 else:
-                    self.obs_base = {}
-                    self.obs_rover = {}
+                    self.obs = {}
 
         self.semaphore.release()
 
+        return 1
+
+    def getSat(self):
+
+        self.semaphore.acquire()
+
+        self.sat = {}
+        
+        self.child.send("sat\r\n")
+
+        if self.expectAnswer("get sat") < 0:
+            self.semaphore.release()
+            return -1
+
+        obs = self.child.before.decode().split("\r\n")
+        obs = [_f for _f in obs if _f]
+
+        matching_strings = [s for s in obs if "SAT" in s]
+
+        if matching_strings != []:
+            header_index = obs.index(matching_strings[0])   # find the header of the OBS table ; always 1
+            header = obs[header_index].split()              # split the header string into columns
+
+            # SAT C1    Az   El L1 L2  Fix1  Fix2  P1Res  P2Res   L1Res   L2Res  Sl1  Sl2  Lock1  Lock2 Rj1 Rj2
+
+            for line in obs[header_index+1:]:
+                spl = line.split()
+
+                name = spl[0] # SAT column
+                self.sat[name] = [spl[2], spl[3]] # Az and El  column
+
+        self.semaphore.release()
         return 1
 
 
